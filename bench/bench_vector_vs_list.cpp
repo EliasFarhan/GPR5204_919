@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <random>
+#include <numeric>
 
 const long fromRange = 8;
 

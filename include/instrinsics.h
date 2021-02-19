@@ -2,6 +2,7 @@
 
 #if defined(__x86_64__) || defined(_M_X64)
 #include <immintrin.h>
+#define __SSE__
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)

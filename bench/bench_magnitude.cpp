@@ -28,10 +28,10 @@ static void BM_MagnitudeNaive(benchmark::State &state)
 
 BENCHMARK(BM_MagnitudeNaive)->Range(fromRange, toRange);
 
-static void BM_MagnitudeAoSoA(benchmark::State &state)
+static void BM_MagnitudeAoSoA4(benchmark::State &state)
 {
-    std::vector<maths::FourVec3f> v1(state.range(0));
-    std::for_each(v1.begin(), v1.end(),[](maths::FourVec3f& v){FillRandom(v);});
+    std::vector<maths::FourVec3f> v1(state.range(0)/4);
+    std::ranges::for_each(v1,[](maths::FourVec3f& v){FillRandom(v);});
     for(auto _ : state)
     {
         for(std::size_t i = 0; i < state.range(0)/4; i++)
@@ -40,6 +40,20 @@ static void BM_MagnitudeAoSoA(benchmark::State &state)
         }
     }
 }
-BENCHMARK(BM_MagnitudeAoSoA)->Range(fromRange, toRange);
+BENCHMARK(BM_MagnitudeAoSoA4)->Range(fromRange, toRange);
+
+static void BM_MagnitudeAoSoA8(benchmark::State& state)
+{
+    std::vector<maths::EightVec3f> v1(state.range(0)/8);
+    std::ranges::for_each(v1, [](maths::EightVec3f& v) { FillRandom(v); });
+    for (auto _ : state)
+    {
+        for (std::size_t i = 0; i < state.range(0) / 8; i++)
+        {
+            benchmark::DoNotOptimize(v1[i].Magnitude());
+        }
+    }
+}
+BENCHMARK(BM_MagnitudeAoSoA8)->Range(fromRange, toRange);
 
 BENCHMARK_MAIN ();

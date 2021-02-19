@@ -1,0 +1,9 @@
+#pragma once
+
+#if defined(__x86_64__) || defined(_M_X64)
+#include <immintrin.h>
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+typedef float v4sf __attribute__ ((vector_size (16)));
+#endif

@@ -1,0 +1,9 @@
+{
+    "name": "gpr5204",
+    "version-string": "1.0",
+    "dependencies":
+    [
+        "benchmark",
+        "fmt"
+    ]
+}

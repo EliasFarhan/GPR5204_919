@@ -1,0 +1,5 @@
+[bB]uild/
+cmake-build-debug/
+cmake-build-release/
+perf.data*
+*.json

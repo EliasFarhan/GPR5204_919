@@ -1,6 +1,5 @@
 #pragma once
 #include <array>
-#include "instrinsics.h"
 
 namespace maths
 {
@@ -26,7 +25,7 @@ union Vec3f
 
     [[nodiscard]] float Magnitude() const;
     [[nodiscard]] float SqrMagnitude() const;
-    Vec3f Normalized() const;
+    [[nodiscard]] Vec3f Normalized() const;
     static const maths::Vec3f zero;
 };
 
@@ -45,7 +44,7 @@ public:
     [[nodiscard]] std::array<float, 4> Magnitude() const;
     [[nodiscard]] std::array<float, 4> SqrMagnitude() const;
     static std::array<float, 4> Dot(const FourVec3f &v1, const FourVec3f &v2);
-    FourVec3f Normalized() const;
+    [[nodiscard]] FourVec3f Normalized() const;
 
     [[nodiscard]] const std::array<float, 4> & Xs() const {return xs;}
     std::array<float, 4> & Xs() {return xs;}
@@ -59,7 +58,7 @@ public:
     FourVec3f operator*(float value) const;
     FourVec3f operator/(const std::array<float, 4>& values) const;
 
-    std::array<Vec3f, 4> vectors() const;
+    [[nodiscard]] std::array<Vec3f, 4> vectors() const;
 private:
     std::array<float, 4> xs{};
     std::array<float, 4> ys{};
@@ -76,7 +75,7 @@ public:
 
     [[nodiscard]] std::array<float, 8> Magnitude() const;
     static std::array<float, 8> Dot(const EightVec3f &v1, const EightVec3f &v2);
-    EightVec3f Normalized() const;
+    [[nodiscard]] EightVec3f Normalized() const;
     std::array<float, 8>& Xs(){return xs;}
     [[nodiscard]] const std::array<float, 8>& Xs() const {return xs;}
     std::array<float, 8>& Ys(){return ys;}
@@ -89,7 +88,7 @@ public:
     EightVec3f operator*(float value) const;
     EightVec3f operator/(const std::array<float, 8>& values) const;
 
-    std::array<Vec3f, 8> vectors() const;
+    [[nodiscard]] std::array<Vec3f, 8> vectors() const;
 private:
     std::array<float, 8> xs{};
     std::array<float, 8> ys{};
@@ -126,7 +125,6 @@ std::array<float, N> Negative(const std::array<float,N>& v)
 template<std::size_t N>
 std::array<float, N> Sqrt(const std::array<float,N>& v);
 
-#ifdef __SSE__
 template<>
 std::array<float, 4> Multiply(const std::array<float, 4>& v1, const std::array<float, 4>& v2);
 
@@ -135,16 +133,14 @@ std::array<float, 4> Multiply(const std::array<float, 4> &v1, float value);
 
 template<>
 std::array<float, 4> Sqrt(const std::array<float,4>& v);
-#endif
-#ifdef __AVX2__
+
 
 template<>
-std::array<float, 8> maths::Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2);
+std::array<float, 8> Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2);
 
 template<>
 std::array<float, 8> Multiply(const std::array<float, 8>& v1, float value);
 
 template<>
 std::array<float, 8> Sqrt(const std::array<float,8>& v);
-#endif
 }

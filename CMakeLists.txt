@@ -12,6 +12,8 @@ elseif(UNIX)
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd64)
         set(COMPILER_FLAGS "${COMPILER_FLAGS} -march=haswell")
     endif()
+elseif ()
+    
 endif()
 
 file(GLOB_RECURSE SRC_FILES src/*.cpp include/*.h)

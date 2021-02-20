@@ -19,25 +19,25 @@ float Vec3f::Magnitude() const
 
 Vec3f Vec3f::operator+(const Vec3f &v) const
 {
-    Vec3f result(x+v.x, y+v.y, z+v.z);
+    const Vec3f result(x+v.x, y+v.y, z+v.z);
     return result;
 }
 
 Vec3f Vec3f::operator-(const Vec3f &v) const
 {
-    Vec3f result(x-v.x, y-v.y, z-v.z);
+    const Vec3f result(x-v.x, y-v.y, z-v.z);
     return result;
 }
 
 Vec3f Vec3f::operator*(float f) const
 {
-    Vec3f result(x*f, y*f, z*f);
+    const Vec3f result(x*f, y*f, z*f);
     return result;
 }
 
 Vec3f Vec3f::operator/(float f) const
 {
-    Vec3f result(x/f, y/f, z/f);
+    const Vec3f result(x/f, y/f, z/f);
     return result;
 }
 Vec3f Vec3f::Normalized() const
@@ -88,29 +88,6 @@ FourVec3f::FourVec3f(Vec3f v)
     }
 }
 
-FourVec3f FourVec3f::operator+(const FourVec3f &v) const
-{
-    FourVec3f fv3f;
-    for(std::size_t i = 0; i < 4; i++)
-    {
-        fv3f.xs[i] = xs[i] + v.xs[i];
-        fv3f.ys[i] = ys[i] + v.ys[i];
-        fv3f.zs[i] = zs[i] + v.zs[i];
-    }
-    return fv3f;
-}
-
-FourVec3f FourVec3f::operator-(const FourVec3f &v) const
-{
-    FourVec3f fv3f;
-    for(std::size_t i = 0; i < 4; i++)
-    {
-        fv3f.xs[i] = xs[i] - v.xs[i];
-        fv3f.ys[i] = ys[i] - v.ys[i];
-        fv3f.zs[i] = zs[i] - v.zs[i];
-    }
-    return fv3f;
-}
 
 std::array<float, 4> FourVec3f::SqrMagnitude() const
 {
@@ -133,42 +110,105 @@ FourVec3f FourVec3f::Normalized() const
 }
 
 
+
+
+#if defined(__SSE__)
+
+
+FourVec3f FourVec3f::operator+(const FourVec3f& v) const
+{
+    FourVec3f fv3f;
+    auto x1 = _mm_loadu_ps(xs.data());
+    auto y1 = _mm_loadu_ps(ys.data());
+    auto z1 = _mm_loadu_ps(zs.data());
+
+    const auto x2 = _mm_loadu_ps(v.xs.data());
+    const auto y2 = _mm_loadu_ps(v.ys.data());
+    const auto z2 = _mm_loadu_ps(v.zs.data());
+
+    x1 = _mm_add_ps(x1, x2);
+    y1 = _mm_add_ps(y1, y2);
+    z1 = _mm_add_ps(z1, z2);
+
+    _mm_storeu_ps(fv3f.xs.data(), x1);
+    _mm_storeu_ps(fv3f.ys.data(), y1);
+    _mm_storeu_ps(fv3f.zs.data(), z1);
+    return fv3f;
+}
+
+FourVec3f FourVec3f::operator-(const FourVec3f& v) const
+{
+    FourVec3f fv3f;
+    auto x1 = _mm_loadu_ps(xs.data());
+    auto y1 = _mm_loadu_ps(ys.data());
+    auto z1 = _mm_loadu_ps(zs.data());
+
+    const auto x2 = _mm_loadu_ps(v.xs.data());
+    const auto y2 = _mm_loadu_ps(v.ys.data());
+    const auto z2 = _mm_loadu_ps(v.zs.data());
+
+    x1 = _mm_sub_ps(x1, x2);
+    y1 = _mm_sub_ps(y1, y2);
+    z1 = _mm_sub_ps(z1, z2);
+
+    _mm_storeu_ps(fv3f.xs.data(), x1);
+    _mm_storeu_ps(fv3f.ys.data(), y1);
+    _mm_storeu_ps(fv3f.zs.data(), z1);
+    return fv3f;
+}
+
 FourVec3f FourVec3f::operator*(const std::array<float, 4>& values) const
 {
     FourVec3f result;
-    for(std::size_t i = 0; i < 4; i++)
-    {
-        result.xs[i] = xs[i]*values[i];
-        result.ys[i] = ys[i]*values[i];
-        result.zs[i] = zs[i]*values[i];
-    }
+    auto x = _mm_loadu_ps(xs.data());
+    auto y = _mm_loadu_ps(ys.data());
+    auto z = _mm_loadu_ps(zs.data());
+    const auto v = _mm_loadu_ps(values.data());
+
+    x = _mm_mul_ps(x, v);
+    y = _mm_mul_ps(y, v);
+    z = _mm_mul_ps(z, v);
+
+    _mm_storeu_ps(result.Xs().data(), x);
+    _mm_storeu_ps(result.Ys().data(), y);
+    _mm_storeu_ps(result.Zs().data(), z);
     return result;
 
 }
 FourVec3f FourVec3f::operator/(const std::array<float, 4>& values) const
 {
     FourVec3f result;
-    for(std::size_t i = 0; i < 4; i++)
-    {
-        result.xs[i] = xs[i]/values[i];
-        result.ys[i] = ys[i]/values[i];
-        result.zs[i] = zs[i]/values[i];
-    }
+    auto x = _mm_loadu_ps(xs.data());
+    auto y = _mm_loadu_ps(ys.data());
+    auto z = _mm_loadu_ps(zs.data());
+    const auto v = _mm_loadu_ps(values.data());
+
+    x = _mm_div_ps(x, v);
+    y = _mm_div_ps(y, v);
+    z = _mm_div_ps(z, v);
+
+    _mm_storeu_ps(result.Xs().data(), x);
+    _mm_storeu_ps(result.Ys().data(), y);
+    _mm_storeu_ps(result.Zs().data(), z);
     return result;
 }
 FourVec3f FourVec3f::operator*(float value) const
 {
     FourVec3f result;
-    for(std::size_t i = 0; i < 4; i++)
-    {
-        result.xs[i] = xs[i]*value;
-        result.ys[i] = ys[i]*value;
-        result.zs[i] = zs[i]*value;
-    }
+    auto x = _mm_loadu_ps(xs.data());
+    auto y = _mm_loadu_ps(ys.data());
+    auto z = _mm_loadu_ps(zs.data());
+    const auto v = _mm_load1_ps(&value);
+
+    x = _mm_mul_ps(x, v);
+    y = _mm_mul_ps(y, v);
+    z = _mm_mul_ps(z, v);
+
+    _mm_storeu_ps(result.Xs().data(), x);
+    _mm_storeu_ps(result.Ys().data(), y);
+    _mm_storeu_ps(result.Zs().data(), z);
     return result;
 }
-
-#if defined(__SSE__)
 
 std::array<float, 4> FourVec3f::Dot(const FourVec3f &v1, const FourVec3f &v2)
 {
@@ -186,10 +226,9 @@ std::array<float, 4> FourVec3f::Dot(const FourVec3f &v1, const FourVec3f &v2)
 
     x1 = _mm_add_ps(x1, y1);
     x1 = _mm_add_ps(x1, z1);
-
-    alignas(4 * sizeof(float))
+    
     std::array<float, 4> result;
-    _mm_store_ps(result.data(), x1);
+    _mm_storeu_ps(result.data(), x1);
     return result;
 }
 std::array<float, 4> FourVec3f::Magnitude() const
@@ -205,10 +244,9 @@ std::array<float, 4> FourVec3f::Magnitude() const
     x1 = _mm_add_ps(x1, y1);
     x1 = _mm_add_ps(x1, z1);
     x1 = _mm_sqrt_ps(x1);
-
-    alignas(4 * sizeof(float))
+    
     std::array<float, 4> result;
-    _mm_store_ps(result.data(), x1);
+    _mm_storeu_ps(result.data(), x1);
     return result;
 }
 template<>
@@ -217,6 +255,7 @@ std::array<float, 4> Multiply(const std::array<float, 4> &v1, const std::array<f
     auto v1s = _mm_loadu_ps(v1.data());
     auto v2s = _mm_loadu_ps(v2.data());
     v1s = _mm_mul_ps(v1s, v2s);
+
     std::array<float, 4> result;
     _mm_storeu_ps(result.data(), v1s);
     return result;
@@ -227,6 +266,7 @@ std::array<float, 4> Multiply(const std::array<float, 4> &v1, float value)
     auto v1s = _mm_loadu_ps(v1.data());
     auto v2 = _mm_load1_ps(&value);
     v1s = _mm_mul_ps(v1s, v2);
+
     std::array<float, 4> result;
     _mm_storeu_ps(result.data(), v1s);
     return result;
@@ -236,9 +276,9 @@ std::array<float, 4> Sqrt(const std::array<float, 4> &v)
 {
     auto vs = _mm_loadu_ps(v.data());
     vs = _mm_sqrt_ps(vs);
-    alignas(4 * sizeof(float))
+
     std::array<float, 4> result;
-    _mm_store_ps(result.data(), vs);
+    _mm_storeu_ps(result.data(), vs);
     return result;
 }
 #else
@@ -311,61 +351,6 @@ std::array<Vec3f, 8> EightVec3f::vectors() const
     return v;
 }
 
-EightVec3f EightVec3f::operator+(const EightVec3f &v) const
-{
-    EightVec3f result;
-    for(std::size_t i = 0; i < 8 ; i++)
-    {
-        result.xs[i] = xs[i]+v.xs[i];
-        result.ys[i] = ys[i]+v.ys[i];
-        result.zs[i] = zs[i]+v.zs[i];
-    }
-    return EightVec3f();
-}
-EightVec3f EightVec3f::operator-(const EightVec3f &v) const
-{
-    EightVec3f result;
-    for(std::size_t i = 0; i < 8 ; i++)
-    {
-        result.xs[i] = xs[i]-v.xs[i];
-        result.ys[i] = ys[i]-v.ys[i];
-        result.zs[i] = zs[i]-v.zs[i];
-    }
-    return EightVec3f();
-}
-EightVec3f EightVec3f::operator*(const std::array<float, 8> &values) const
-{
-    EightVec3f result;
-    for(std::size_t i = 0; i < 8 ; i++)
-    {
-        result.xs[i] = xs[i]*values[i];
-        result.ys[i] = ys[i]*values[i];
-        result.zs[i] = zs[i]*values[i];
-    }
-    return EightVec3f();
-}
-EightVec3f EightVec3f::operator*(float value) const
-{
-    EightVec3f result;
-    for(std::size_t i = 0; i < 8 ; i++)
-    {
-        result.xs[i] = xs[i]*value;
-        result.ys[i] = ys[i]*value;
-        result.zs[i] = zs[i]*value;
-    }
-    return EightVec3f();
-}
-EightVec3f EightVec3f::operator/(const std::array<float, 8> &values) const
-{
-    EightVec3f result;
-    for(std::size_t i = 0; i < 8 ; i++)
-    {
-        result.xs[i] = xs[i]/values[i];
-        result.ys[i] = ys[i]/values[i];
-        result.zs[i] = zs[i]/values[i];
-    }
-    return EightVec3f();
-}
 
 EightVec3f EightVec3f::Normalized() const
 {
@@ -373,6 +358,108 @@ EightVec3f EightVec3f::Normalized() const
 }
 
 #if defined(__AVX2__)
+
+
+EightVec3f EightVec3f::operator+(const EightVec3f& v) const
+{
+    EightVec3f result;
+
+    auto x1 = _mm256_loadu_ps(xs.data());
+    auto y1 = _mm256_loadu_ps(xs.data());
+    auto z1 = _mm256_loadu_ps(xs.data());
+
+    const auto x2 = _mm256_loadu_ps(v.xs.data());
+    const auto y2 = _mm256_loadu_ps(v.xs.data());
+    const auto z2 = _mm256_loadu_ps(v.xs.data());
+
+    x1 = _mm256_add_ps(x1, x2);
+    y1 = _mm256_add_ps(y1, y2);
+    z1 = _mm256_add_ps(z1, z2);
+
+    _mm256_storeu_ps(result.xs.data(), x1);
+    _mm256_storeu_ps(result.ys.data(), y1);
+    _mm256_storeu_ps(result.zs.data(), z1);
+
+    return result;
+}
+
+EightVec3f EightVec3f::operator-(const EightVec3f& v) const
+{
+    EightVec3f result;
+
+    auto x1 = _mm256_loadu_ps(xs.data());
+    auto y1 = _mm256_loadu_ps(xs.data());
+    auto z1 = _mm256_loadu_ps(xs.data());
+
+    const auto x2 = _mm256_loadu_ps(v.xs.data());
+    const auto y2 = _mm256_loadu_ps(v.xs.data());
+    const auto z2 = _mm256_loadu_ps(v.xs.data());
+
+    x1 = _mm256_sub_ps(x1, x2);
+    y1 = _mm256_sub_ps(y1, y2);
+    z1 = _mm256_sub_ps(z1, z2);
+
+    _mm256_storeu_ps(result.xs.data(), x1);
+    _mm256_storeu_ps(result.ys.data(), y1);
+    _mm256_storeu_ps(result.zs.data(), z1);
+
+    return result;
+}
+
+EightVec3f EightVec3f::operator*(const std::array<float, 8>& values) const
+{
+    EightVec3f result;
+    auto x = _mm256_loadu_ps(xs.data());
+    auto y = _mm256_loadu_ps(ys.data());
+    auto z = _mm256_loadu_ps(zs.data());
+    const auto v = _mm256_loadu_ps(values.data());
+
+    x = _mm256_mul_ps(x, v);
+    y = _mm256_mul_ps(y, v);
+    z = _mm256_mul_ps(z, v);
+
+    _mm256_storeu_ps(result.Xs().data(), x);
+    _mm256_storeu_ps(result.Ys().data(), y);
+    _mm256_storeu_ps(result.Zs().data(), z);
+    return result;
+}
+
+EightVec3f EightVec3f::operator*(float value) const
+{
+    EightVec3f result;
+    auto x = _mm256_loadu_ps(xs.data());
+    auto y = _mm256_loadu_ps(ys.data());
+    auto z = _mm256_loadu_ps(zs.data());
+    const auto v = _mm256_broadcast_ss(&value);
+
+    x = _mm256_mul_ps(x, v);
+    y = _mm256_mul_ps(y, v);
+    z = _mm256_mul_ps(z, v);
+
+    _mm256_storeu_ps(result.Xs().data(), x);
+    _mm256_storeu_ps(result.Ys().data(), y);
+    _mm256_storeu_ps(result.Zs().data(), z);
+    return result;
+}
+
+EightVec3f EightVec3f::operator/(const std::array<float, 8>& values) const
+{
+    EightVec3f result;
+    auto x = _mm256_loadu_ps(xs.data());
+    auto y = _mm256_loadu_ps(ys.data());
+    auto z = _mm256_loadu_ps(zs.data());
+    const auto v = _mm256_loadu_ps(values.data());
+
+    x = _mm256_div_ps(x, v);
+    y = _mm256_div_ps(y, v);
+    z = _mm256_div_ps(z, v);
+
+    _mm256_storeu_ps(result.Xs().data(), x);
+    _mm256_storeu_ps(result.Ys().data(), y);
+    _mm256_storeu_ps(result.Zs().data(), z);
+    return result;
+}
+
 std::array<float, 8> EightVec3f::Dot(const EightVec3f &v1, const EightVec3f &v2)
 {
     auto x1 = _mm256_loadu_ps(v1.xs.data());
@@ -389,10 +476,9 @@ std::array<float, 8> EightVec3f::Dot(const EightVec3f &v1, const EightVec3f &v2)
 
     x1 = _mm256_add_ps(x1, y1);
     x1 = _mm256_add_ps(x1, z1);
-
-    alignas(8 * sizeof(float))
+    
     std::array<float, 8> result;
-    _mm256_store_ps(result.data(), x1);
+    _mm256_storeu_ps(result.data(), x1);
     return result;
 }
 std::array<float, 8> EightVec3f::Magnitude() const
@@ -408,10 +494,9 @@ std::array<float, 8> EightVec3f::Magnitude() const
     x1 = _mm256_add_ps(x1, y1);
     x1 = _mm256_add_ps(x1, z1);
     x1 = _mm256_sqrt_ps(x1);
-
-    alignas(8 * sizeof(float))
+    
     std::array<float, 8> result;
-    _mm256_store_ps(result.data(), x1);
+    _mm256_storeu_ps(result.data(), x1);
     return result;
 }
 
@@ -421,6 +506,7 @@ std::array<float, 8> maths::Multiply(const std::array<float, 8> &v1, const std::
     auto v1s = _mm256_loadu_ps(v1.data());
     auto v2s = _mm256_loadu_ps(v2.data());
     v1s = _mm256_mul_ps(v1s, v2s);
+
     std::array<float, 8> result;
     _mm256_storeu_ps(result.data(), v1s);
     return result;
@@ -432,6 +518,7 @@ std::array<float, 8> Multiply(const std::array<float, 8>& v1, float value)
     auto v1s = _mm256_loadu_ps(v1.data());
     auto v2 = _mm256_broadcast_ss(&value);
     v1s = _mm256_mul_ps(v1s, v2);
+
     std::array<float, 8> result;
     _mm256_storeu_ps(result.data(), v1s);
     return result;
@@ -442,6 +529,7 @@ std::array<float, 8> Sqrt(const std::array<float, 8> &v)
 {
     auto vs = _mm256_loadu_ps(v.data());
     vs = _mm256_sqrt_ps(vs);
+
     std::array<float, 8> result;
     _mm256_storeu_ps(result.data(), vs);
     return result;

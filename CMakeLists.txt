@@ -18,7 +18,9 @@ file(GLOB_RECURSE SRC_FILES src/*.cpp include/*.h)
 add_library(Common STATIC ${SRC_FILES})
 target_include_directories(Common PUBLIC "include/")
 set_property(TARGET Common APPEND_STRING PROPERTY COMPILE_FLAGS " ${COMPILER_FLAGS} ")
-
+if(MSVC)
+    target_compile_definitions(Common PRIVATE _USE_MATH_DEFINES=1)
+endif()
 find_package(benchmark CONFIG REQUIRED)
 
 file(GLOB_RECURSE BENCH_FILES bench/*.cpp)

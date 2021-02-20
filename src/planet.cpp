@@ -4,6 +4,8 @@
 
 #include "planet.h"
 #include <random>
+#include <cmath>
+
 
 const float gravityConst = 1000.0f;
 const float centerMass = 1000.0f;

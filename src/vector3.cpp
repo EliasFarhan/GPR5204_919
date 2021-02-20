@@ -17,10 +17,43 @@ float Vec3f::Magnitude() const
     return std::sqrt(x*x+y*y+z*z);
 }
 
+Vec3f Vec3f::operator+(const Vec3f &v) const
+{
+    Vec3f result(x+v.x, y+v.y, z+v.z);
+    return result;
+}
+
+Vec3f Vec3f::operator-(const Vec3f &v) const
+{
+    Vec3f result(x-v.x, y-v.y, z-v.z);
+    return result;
+}
+
+Vec3f Vec3f::operator*(float f) const
+{
+    Vec3f result(x*f, y*f, z*f);
+    return result;
+}
+
+Vec3f Vec3f::operator/(float f) const
+{
+    Vec3f result(x/f, y/f, z/f);
+    return result;
+}
+Vec3f Vec3f::Normalized() const
+{
+    return *this/Magnitude();
+}
+float Vec3f::SqrMagnitude() const
+{
+    return Dot(*this, *this);
+}
+
 float Dot(const Vec3f &v1, const Vec3f &v2)
 {
     return v1.x*v2.x+v1.y*v2.y+v1.z*v2.z;
 }
+
 
 FourVec3f::FourVec3f(const Vec3f *ptr)
 {
@@ -33,7 +66,117 @@ FourVec3f::FourVec3f(const Vec3f *ptr)
 }
 
 
+std::array<Vec3f, 4> FourVec3f::vectors() const
+{
+    std::array<Vec3f, 4> v;
+    for(std::size_t i = 0; i < 4; i++)
+    {
+        v[i][0] = xs[i];
+        v[i][1] = ys[i];
+        v[i][2] = zs[i];
+    }
+    return v;
+}
+FourVec3f::FourVec3f(Vec3f v)
+{
+    for(std::size_t i = 0; i < 4; i++)
+    {
+        xs[i] = v.x;
+        ys[i] = v.y;
+        zs[i] = v.z;
+    }
+}
+
+FourVec3f FourVec3f::operator+(const FourVec3f &v) const
+{
+    FourVec3f fv3f;
+    for(std::size_t i = 0; i < 4; i++)
+    {
+        fv3f.xs[i] = xs[i] + v.xs[i];
+        fv3f.ys[i] = ys[i] + v.ys[i];
+        fv3f.zs[i] = zs[i] + v.zs[i];
+    }
+    return fv3f;
+}
+
+FourVec3f FourVec3f::operator-(const FourVec3f &v) const
+{
+    FourVec3f fv3f;
+    for(std::size_t i = 0; i < 4; i++)
+    {
+        fv3f.xs[i] = xs[i] - v.xs[i];
+        fv3f.ys[i] = ys[i] - v.ys[i];
+        fv3f.zs[i] = zs[i] - v.zs[i];
+    }
+    return fv3f;
+}
+
+std::array<float, 4> FourVec3f::SqrMagnitude() const
+{
+    return Dot(*this, *this);
+}
+
+
+FourVec3f::FourVec3f(
+    const std::array<float, 4>& xs,
+    const std::array<float, 4>& ys,
+    const std::array<float, 4>& zs) :
+    xs(xs), ys(ys), zs(zs)
+{
+
+}
+
+FourVec3f FourVec3f::Normalized() const
+{
+    return *this/Magnitude();
+}
+
+
+FourVec3f FourVec3f::operator*(const std::array<float, 4>& values) const
+{
+    FourVec3f result;
+    for(std::size_t i = 0; i < 4; i++)
+    {
+        result.xs[i] = xs[i]*values[i];
+        result.ys[i] = ys[i]*values[i];
+        result.zs[i] = zs[i]*values[i];
+    }
+    return result;
+
+}
+FourVec3f FourVec3f::operator/(const std::array<float, 4>& values) const
+{
+    FourVec3f result;
+    for(std::size_t i = 0; i < 4; i++)
+    {
+        result.xs[i] = xs[i]/values[i];
+        result.ys[i] = ys[i]/values[i];
+        result.zs[i] = zs[i]/values[i];
+    }
+    return result;
+}
+FourVec3f FourVec3f::operator*(float value) const
+{
+    FourVec3f result;
+    for(std::size_t i = 0; i < 4; i++)
+    {
+        result.xs[i] = xs[i]*value;
+        result.ys[i] = ys[i]*value;
+        result.zs[i] = zs[i]*value;
+    }
+    return result;
+}
+
 #if defined(__SSE__)
+std::array<float, 4> Sqrt(const std::array<float, 4> &v)
+{
+    auto vs = _mm_loadu_ps(v.data());
+    vs = _mm_sqrt_ps(vs);
+    alignas(4 * sizeof(float))
+    std::array<float, 4> result;
+    _mm_store_ps(result.data(), vs);
+    return result;
+}
 std::array<float, 4> FourVec3f::Dot(const FourVec3f &v1, const FourVec3f &v2)
 {
     auto x1 = _mm_loadu_ps(v1.xs.data());
@@ -116,7 +259,15 @@ EightVec3f::EightVec3f(const Vec3f *ptr)
     }
 }
 
-
+EightVec3f::EightVec3f(Vec3f v)
+{
+    for(int i = 0; i < 8; i++)
+    {
+        xs[i] = v.x;
+        ys[i] = v.y;
+        zs[i] = v.z;
+    }
+}
 #if defined(__AVX2__)
 std::array<float, 8> EightVec3f::Dot(const EightVec3f &v1, const EightVec3f &v2)
 {
@@ -158,6 +309,17 @@ std::array<float, 8> EightVec3f::Magnitude() const
     std::array<float, 8> result;
     _mm256_store_ps(result.data(), x1);
     return result;
+}
+std::array<Vec3f, 8> EightVec3f::vectors() const
+{
+    std::array<Vec3f, 8> v;
+    for(std::size_t i = 0; i < 8; i++)
+    {
+        v[i][0] = xs[i];
+        v[i][1] = ys[i];
+        v[i][2] = zs[i];
+    }
+    return v;
 }
 #endif
 }

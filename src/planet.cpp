@@ -107,5 +107,27 @@ PlanetSystem8::PlanetSystem8(std::size_t length)
 
 void PlanetSystem8::Update(float dt)
 {
+    for(std::size_t i = 0; i < positionsSOA_.size(); i++)
+    {
+        const auto sunPos = maths::EightVec3f(maths::Vec3f());
+        const auto deltaToCenter = sunPos - positionsSOA_[i];
+        const auto r = deltaToCenter.Magnitude();
+        const auto forceScalar = maths::Multiply(maths::Inverse(maths::Multiply(r,r)),
+                                                 gravityConst * centerMass * asteroidMass);
+        const auto forceVector = deltaToCenter / r * forceScalar;
+        auto velDir = maths::EightVec3f(maths::Negative(deltaToCenter.Zs()), std::array<float, 8>(), deltaToCenter.Xs());
+        velDir = velDir.Normalized();
 
+        const auto speed = maths::Sqrt(maths::Multiply(
+            maths::Multiply(forceVector.Magnitude(), deltaToCenter.Magnitude()),
+            1.0f / asteroidMass));
+        const auto velocity = velDir * speed;
+        positionsSOA_[i] = positionsSOA_[i] + velocity * dt;
+        // Putting back the SoA in AoS format
+        const auto pos = positionsSOA_[i].vectors();
+        for(std::size_t j = 0; j < pos.size(); j++)
+        {
+            positions_[i*8+j] = pos[j];
+        }
+    }
 }

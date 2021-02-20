@@ -42,3 +42,7 @@ static void BM_Planet8(benchmark::State &state)
         planetSystem.Update(0.02f);
     }
 }
+
+BENCHMARK(BM_Planet8)->Range(fromRange, toRange);
+
+BENCHMARK_MAIN();

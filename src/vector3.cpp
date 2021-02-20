@@ -55,6 +55,7 @@ float Dot(const Vec3f &v1, const Vec3f &v2)
 }
 
 
+
 FourVec3f::FourVec3f(const Vec3f *ptr)
 {
     for(int i = 0; i < 4; i++)
@@ -168,15 +169,7 @@ FourVec3f FourVec3f::operator*(float value) const
 }
 
 #if defined(__SSE__)
-std::array<float, 4> Sqrt(const std::array<float, 4> &v)
-{
-    auto vs = _mm_loadu_ps(v.data());
-    vs = _mm_sqrt_ps(vs);
-    alignas(4 * sizeof(float))
-    std::array<float, 4> result;
-    _mm_store_ps(result.data(), vs);
-    return result;
-}
+
 std::array<float, 4> FourVec3f::Dot(const FourVec3f &v1, const FourVec3f &v2)
 {
     auto x1 = _mm_loadu_ps(v1.xs.data());
@@ -216,6 +209,36 @@ std::array<float, 4> FourVec3f::Magnitude() const
     alignas(4 * sizeof(float))
     std::array<float, 4> result;
     _mm_store_ps(result.data(), x1);
+    return result;
+}
+template<>
+std::array<float, 4> Multiply(const std::array<float, 4> &v1, const std::array<float, 4> &v2)
+{
+    auto v1s = _mm_loadu_ps(v1.data());
+    auto v2s = _mm_loadu_ps(v2.data());
+    v1s = _mm_mul_ps(v1s, v2s);
+    std::array<float, 4> result;
+    _mm_storeu_ps(result.data(), v1s);
+    return result;
+}
+template<>
+std::array<float, 4> Multiply(const std::array<float, 4> &v1, float value)
+{
+    auto v1s = _mm_loadu_ps(v1.data());
+    auto v2 = _mm_load1_ps(&value);
+    v1s = _mm_mul_ps(v1s, v2);
+    std::array<float, 4> result;
+    _mm_storeu_ps(result.data(), v1s);
+    return result;
+}
+template<>
+std::array<float, 4> Sqrt(const std::array<float, 4> &v)
+{
+    auto vs = _mm_loadu_ps(v.data());
+    vs = _mm_sqrt_ps(vs);
+    alignas(4 * sizeof(float))
+    std::array<float, 4> result;
+    _mm_store_ps(result.data(), vs);
     return result;
 }
 #else
@@ -268,6 +291,87 @@ EightVec3f::EightVec3f(Vec3f v)
         zs[i] = v.z;
     }
 }
+
+EightVec3f::EightVec3f(const std::array<float, 8> &xs, const std::array<float, 8> &ys, const std::array<float, 8> &zs) :
+    xs(xs), ys(ys), zs(zs)
+{
+
+}
+
+
+std::array<Vec3f, 8> EightVec3f::vectors() const
+{
+    std::array<Vec3f, 8> v;
+    for(std::size_t i = 0; i < 8; i++)
+    {
+        v[i][0] = xs[i];
+        v[i][1] = ys[i];
+        v[i][2] = zs[i];
+    }
+    return v;
+}
+
+EightVec3f EightVec3f::operator+(const EightVec3f &v) const
+{
+    EightVec3f result;
+    for(std::size_t i = 0; i < 8 ; i++)
+    {
+        result.xs[i] = xs[i]+v.xs[i];
+        result.ys[i] = ys[i]+v.ys[i];
+        result.zs[i] = zs[i]+v.zs[i];
+    }
+    return EightVec3f();
+}
+EightVec3f EightVec3f::operator-(const EightVec3f &v) const
+{
+    EightVec3f result;
+    for(std::size_t i = 0; i < 8 ; i++)
+    {
+        result.xs[i] = xs[i]-v.xs[i];
+        result.ys[i] = ys[i]-v.ys[i];
+        result.zs[i] = zs[i]-v.zs[i];
+    }
+    return EightVec3f();
+}
+EightVec3f EightVec3f::operator*(const std::array<float, 8> &values) const
+{
+    EightVec3f result;
+    for(std::size_t i = 0; i < 8 ; i++)
+    {
+        result.xs[i] = xs[i]*values[i];
+        result.ys[i] = ys[i]*values[i];
+        result.zs[i] = zs[i]*values[i];
+    }
+    return EightVec3f();
+}
+EightVec3f EightVec3f::operator*(float value) const
+{
+    EightVec3f result;
+    for(std::size_t i = 0; i < 8 ; i++)
+    {
+        result.xs[i] = xs[i]*value;
+        result.ys[i] = ys[i]*value;
+        result.zs[i] = zs[i]*value;
+    }
+    return EightVec3f();
+}
+EightVec3f EightVec3f::operator/(const std::array<float, 8> &values) const
+{
+    EightVec3f result;
+    for(std::size_t i = 0; i < 8 ; i++)
+    {
+        result.xs[i] = xs[i]/values[i];
+        result.ys[i] = ys[i]/values[i];
+        result.zs[i] = zs[i]/values[i];
+    }
+    return EightVec3f();
+}
+
+EightVec3f EightVec3f::Normalized() const
+{
+    return *this/Magnitude();
+}
+
 #if defined(__AVX2__)
 std::array<float, 8> EightVec3f::Dot(const EightVec3f &v1, const EightVec3f &v2)
 {
@@ -310,16 +414,38 @@ std::array<float, 8> EightVec3f::Magnitude() const
     _mm256_store_ps(result.data(), x1);
     return result;
 }
-std::array<Vec3f, 8> EightVec3f::vectors() const
+
+template<>
+std::array<float, 8> maths::Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2)
 {
-    std::array<Vec3f, 8> v;
-    for(std::size_t i = 0; i < 8; i++)
-    {
-        v[i][0] = xs[i];
-        v[i][1] = ys[i];
-        v[i][2] = zs[i];
-    }
-    return v;
+    auto v1s = _mm256_loadu_ps(v1.data());
+    auto v2s = _mm256_loadu_ps(v2.data());
+    v1s = _mm256_mul_ps(v1s, v2s);
+    std::array<float, 8> result;
+    _mm256_storeu_ps(result.data(), v1s);
+    return result;
 }
+
+template<>
+std::array<float, 8> Multiply(const std::array<float, 8>& v1, float value)
+{
+    auto v1s = _mm256_loadu_ps(v1.data());
+    auto v2 = _mm256_broadcast_ss(&value);
+    v1s = _mm256_mul_ps(v1s, v2);
+    std::array<float, 8> result;
+    _mm256_storeu_ps(result.data(), v1s);
+    return result;
+}
+
+template<>
+std::array<float, 8> Sqrt(const std::array<float, 8> &v)
+{
+    auto vs = _mm256_loadu_ps(v.data());
+    vs = _mm256_sqrt_ps(vs);
+    std::array<float, 8> result;
+    _mm256_storeu_ps(result.data(), vs);
+    return result;
+}
+
 #endif
 }

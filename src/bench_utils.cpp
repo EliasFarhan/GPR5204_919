@@ -53,3 +53,11 @@ void FillRandom(maths::EightVec3f& v)
         zs = dis(gen);
     }
 }
+
+void FillRandom(std::vector<int> &v, int low, int high)
+{
+    static std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_int_distribution<int> dis(low, high);
+    std::for_each(v.begin(), v.end(), [&dis](int& n){n = dis(gen);});
+}

@@ -26,7 +26,7 @@ union Vec3f
     [[nodiscard]] float Magnitude() const;
     [[nodiscard]] float SqrMagnitude() const;
     [[nodiscard]] Vec3f Normalized() const;
-    static const maths::Vec3f zero;
+    static const Vec3f zero;
 };
 
 inline Vec3f const Vec3f::zero = Vec3f();

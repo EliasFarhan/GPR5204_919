@@ -15,8 +15,8 @@ const long toRange = 1 << 15;
 
 static void BM_CacheBench(benchmark::State &state)
 {
-    int bytes = 1 << state.range(0);
-    int count = (bytes/sizeof(int))/2;
+    std::size_t bytes = 1u << state.range(0);
+    std::size_t count = (bytes/sizeof(int))/2u;
     std::vector<int> v(count);
     FillRandom(v, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     for(auto _ : state)
@@ -28,7 +28,7 @@ static void BM_CacheBench(benchmark::State &state)
         }
         benchmark::DoNotOptimize(sum);
     }
-    state.SetBytesProcessed(long(state.iterations())*long(bytes));
+    state.SetBytesProcessed(std::size_t(state.iterations())* std::size_t(bytes));
     state.SetLabel(bytes/1024 > 1000?std::to_string(bytes/1024/1024)+"mb":std::to_string(bytes/1024)+"kb");
 
 }
@@ -36,8 +36,8 @@ BENCHMARK(BM_CacheBench)->DenseRange(13, 26)->ReportAggregatesOnly(true);
 
 static void BM_RandomCacheBench(benchmark::State &state)
 {
-    int bytes = 1 << state.range(0);
-    int count = (bytes/sizeof(int))/2;
+    std::size_t bytes = 1u << state.range(0);
+    std::size_t count = (bytes/sizeof(int))/2u;
     std::vector<int> v(count);
     FillRandom(v, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     std::vector<int> indices(count);
@@ -51,7 +51,7 @@ static void BM_RandomCacheBench(benchmark::State &state)
         }
         benchmark::DoNotOptimize(sum);
     }
-    state.SetBytesProcessed(long(state.iterations())*long(bytes));
+    state.SetBytesProcessed(std::size_t(state.iterations())* std::size_t(bytes));
     state.SetLabel(bytes/1024 > 1000?std::to_string(bytes/1024/1024)+"mb":std::to_string(bytes/1024)+"kb");
 
 }

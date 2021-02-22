@@ -105,6 +105,7 @@ std::array<float, N> Multiply(const std::array<float, N>& v1, const std::array<f
     {
         result[i] = v1[i]*v2[i];
     }
+    return result;
 }
 
 template<std::size_t N>
@@ -115,6 +116,7 @@ std::array<float, N> Multiply(const std::array<float, N>& v1, float value)
     {
         result[i] = v1[i]*value;
     }
+    return result;
 }
 
 template<std::size_t N>

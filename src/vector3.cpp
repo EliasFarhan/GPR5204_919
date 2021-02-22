@@ -281,32 +281,182 @@ std::array<float, 4> Sqrt(const std::array<float, 4> &v)
     _mm_storeu_ps(result.data(), vs);
     return result;
 }
-#else
+#endif
+
+#if defined(__aarch64__)
+FourVec3f FourVec3f::operator+(const FourVec3f& v) const
+{
+    FourVec3f fv3f;
+    auto x1 = vld1q_f32(xs.data());
+    auto y1 = vld1q_f32(ys.data());
+    auto z1 = vld1q_f32(zs.data());
+
+    const auto x2 = vld1q_f32(v.xs.data());
+    const auto y2 = vld1q_f32(v.ys.data());
+    const auto z2 = vld1q_f32(v.zs.data());
+
+    x1 = vaddq_f32(x1, x2);
+    y1 = vaddq_f32(y1, y2);
+    z1 = vaddq_f32(z1, z2);
+
+    vst1q_f32(fv3f.xs.data(), x1);
+    vst1q_f32(fv3f.ys.data(), y1);
+    vst1q_f32(fv3f.zs.data(), z1);
+    return fv3f;
+}
+
+FourVec3f FourVec3f::operator-(const FourVec3f& v) const
+{
+    FourVec3f fv3f;
+    auto x1 = vld1q_f32(xs.data());
+    auto y1 = vld1q_f32(ys.data());
+    auto z1 = vld1q_f32(zs.data());
+
+    const auto x2 = vld1q_f32(v.xs.data());
+    const auto y2 = vld1q_f32(v.ys.data());
+    const auto z2 = vld1q_f32(v.zs.data());
+
+    x1 = vsubq_f32(x1, x2);
+    y1 = vsubq_f32(y1, y2);
+    z1 = vsubq_f32(z1, z2);
+
+    vst1q_f32(fv3f.xs.data(), x1);
+    vst1q_f32(fv3f.ys.data(), y1);
+    vst1q_f32(fv3f.zs.data(), z1);
+    return fv3f;
+}
+
+FourVec3f FourVec3f::operator*(const std::array<float, 4>& values) const
+{
+    FourVec3f fv3f;
+    auto x1 = vld1q_f32(xs.data());
+    auto y1 = vld1q_f32(ys.data());
+    auto z1 = vld1q_f32(zs.data());
+
+    const auto x2 = vld1q_f32(values.data());
+    const auto y2 = vld1q_f32(values.data());
+    const auto z2 = vld1q_f32(values.data());
+
+    x1 = vmulq_f32(x1, x2);
+    y1 = vmulq_f32(y1, y2);
+    z1 = vmulq_f32(z1, z2);
+
+    vst1q_f32(fv3f.xs.data(), x1);
+    vst1q_f32(fv3f.ys.data(), y1);
+    vst1q_f32(fv3f.zs.data(), z1);
+    return fv3f;
+
+}
+FourVec3f FourVec3f::operator/(const std::array<float, 4>& values) const
+{
+    FourVec3f fv3f;
+    auto x1 = vld1q_f32(xs.data());
+    auto y1 = vld1q_f32(ys.data());
+    auto z1 = vld1q_f32(zs.data());
+
+    const auto x2 = vld1q_f32(values.data());
+    const auto y2 = vld1q_f32(values.data());
+    const auto z2 = vld1q_f32(values.data());
+
+    x1 = vdivq_f32(x1, x2);
+    y1 = vdivq_f32(y1, y2);
+    z1 = vdivq_f32(z1, z2);
+
+    vst1q_f32(fv3f.xs.data(), x1);
+    vst1q_f32(fv3f.ys.data(), y1);
+    vst1q_f32(fv3f.zs.data(), z1);
+    return fv3f;
+}
+FourVec3f FourVec3f::operator*(float value) const
+{
+	FourVec3f fv3f;
+    auto x1 = vld1q_f32(xs.data());
+    auto y1 = vld1q_f32(ys.data());
+    auto z1 = vld1q_f32(zs.data());
+
+    const auto v = vld1q_dup_f32(&value);
+
+    x1 = vmulq_f32(x1, v);
+    y1 = vmulq_f32(y1, v);
+    z1 = vmulq_f32(z1, v);
+
+    vst1q_f32(fv3f.xs.data(), x1);
+    vst1q_f32(fv3f.ys.data(), y1);
+    vst1q_f32(fv3f.zs.data(), z1);
+    return fv3f;
+}
+
 std::array<float, 4> FourVec3f::Dot(const FourVec3f &v1, const FourVec3f &v2)
 {
-    alignas(4 * sizeof(float))
+	FourVec3f fv3f;
+    auto x1 = vld1q_f32(v1.xs.data());
+    auto y1 = vld1q_f32(v1.ys.data());
+    auto z1 = vld1q_f32(v1.zs.data());
+
+    const auto x2 = vld1q_f32(v2.xs.data());
+    const auto y2 = vld1q_f32(v2.ys.data());
+    const auto z2 = vld1q_f32(v2.zs.data());
+    
+
+    x1 = vmulq_f32(x1, x2);
+    y1 = vmulq_f32(y1, y2);
+    z1 = vmulq_f32(z1, z2);
+
+    x1 = vaddq_f32(x1, y1);
+    x1 = vaddq_f32(x1, z1);
+    
     std::array<float, 4> result;
+    vst1q_f32(result.data(), x1);
+    return result;
+}
+std::array<float, 4> FourVec3f::Magnitude() const
+{
+    auto x1 = vld1q_f32(xs.data());
+    auto y1 = vld1q_f32(ys.data());
+    auto z1 = vld1q_f32(zs.data());
 
-    v4sf x1 = {v1.xs[0], v1.xs[1], v1.xs[2], v1.xs[3]};
-    v4sf y1 = {v1.ys[0], v1.ys[1], v1.ys[2], v1.ys[3]};
-    v4sf z1 = {v1.zs[0], v1.zs[1], v1.zs[2], v1.zs[3]};
+    x1 = vmulq_f32(x1, x1);
+    y1 = vmulq_f32(y1, y1);
+    z1 = vmulq_f32(z1, z1);
 
-    v4sf x2 = {v2.xs[0], v2.xs[1], v2.xs[2], v2.xs[3]};
-    v4sf y2 = {v2.ys[0], v2.ys[1], v2.ys[2], v2.ys[3]};
-    v4sf z2 = {v2.zs[0], v2.zs[1], v2.zs[2], v2.zs[3]};
+    x1 = vaddq_f32(x1, y1);
+    x1 = vaddq_f32(x1, z1);
+    x1 = vsqrtq_f32(x1);
+    
+    std::array<float, 4> result;
+    vst1q_f32(result.data(), x1);
+    return result;
+}
+template<>
+std::array<float, 4> Multiply(const std::array<float, 4> &v1, const std::array<float, 4> &v2)
+{
+    auto v1s = vld1q_f32(v1.data());
+    auto v2s = vld1q_f32(v2.data());
+    v1s = vmulq_f32(v1s, v2s);
 
-    x1 = x1 * x2;
-    y1 = y1 * y2;
-    z1 = z1 * z2;
+    std::array<float, 4> result;
+    vst1q_f32(result.data(), v1s);
+    return result;
+}
+template<>
+std::array<float, 4> Multiply(const std::array<float, 4> &v1, float value)
+{
+    auto v1s = vld1q_f32(v1.data());
+    auto v2 = vld1q_dup_f32(&value);
+    v1s = vmulq_f32(v1s, v2);
 
-    x1 = x1 + y1;
-    x1 = x1 + z1;
+    std::array<float, 4> result;
+    vst1q_f32(result.data(), v1s);
+    return result;
+}
+template<>
+std::array<float, 4> Sqrt(const std::array<float, 4> &v)
+{
+    auto vs = vld1q_f32(v.data());
+    vs = vsqrtq_f32(vs);
 
-    result[0] = x1[0];
-    result[1] = x1[1];
-    result[2] = x1[2];
-    result[3] = x1[3];
-
+    std::array<float, 4> result;
+    vst1q_f32(result.data(), vs);
     return result;
 }
 #endif
@@ -532,6 +682,123 @@ std::array<float, 8> Sqrt(const std::array<float, 8> &v)
 
     std::array<float, 8> result;
     _mm256_storeu_ps(result.data(), vs);
+    return result;
+}
+
+#endif
+
+#if defined(__aarch64__)
+
+EightVec3f EightVec3f::operator+(const EightVec3f& v) const
+{
+    EightVec3f result;
+	for(int i = 0; i < 8; i++)
+	{
+		result.xs[i] = xs[i]+v.xs[i];
+		result.ys[i] = ys[i]+v.ys[i];
+		result.zs[i] = zs[i]+v.zs[i];
+	}
+    return result;
+}
+
+EightVec3f EightVec3f::operator-(const EightVec3f& v) const
+{
+    EightVec3f result;
+	for(int i = 0; i < 8; i++)
+	{
+		result.xs[i] = xs[i]-v.xs[i];
+		result.ys[i] = ys[i]-v.ys[i];
+		result.zs[i] = zs[i]-v.zs[i];
+	}
+    return result;
+}
+
+EightVec3f EightVec3f::operator*(const std::array<float, 8>& values) const
+{
+    EightVec3f result;
+	for(int i = 0; i < 8; i++)
+	{
+		result.xs[i] = xs[i]*values[i];
+		result.ys[i] = ys[i]*values[i];
+		result.zs[i] = zs[i]*values[i];
+	}
+    return result;
+}
+
+EightVec3f EightVec3f::operator*(float value) const
+{
+    EightVec3f result;
+	for(int i = 0; i < 8; i++)
+	{
+		result.xs[i] = xs[i]*value;
+		result.ys[i] = ys[i]*value;
+		result.zs[i] = zs[i]*value;
+	}
+    return result;
+}
+
+EightVec3f EightVec3f::operator/(const std::array<float, 8>& values) const
+{
+    EightVec3f result;
+	for(int i = 0; i < 8; i++)
+	{
+		result.xs[i] = xs[i]/values[i];
+		result.ys[i] = ys[i]/values[i];
+		result.zs[i] = zs[i]/values[i];
+	}
+    return result;
+}
+
+std::array<float, 8> EightVec3f::Dot(const EightVec3f &v1, const EightVec3f &v2)
+{
+	std::array<float, 8> result;
+	for(int i = 0; i < 8; i++)
+	{
+		result[i] = v1.xs[i]*v2.xs[i]+v1.ys[i]*v2.ys[i]+v1.zs[i]*v2.zs[i];
+	}
+    return result;
+}
+std::array<float, 8> EightVec3f::Magnitude() const
+{
+    std::array<float, 8> result;
+	for(int i = 0; i < 8; i++)
+	{
+		result[i] = std::sqrt(
+		xs[i]*xs[i]+ys[i]*ys[i]+zs[i]*zs[i]);
+	}
+    return result;
+}
+
+template<>
+std::array<float, 8> maths::Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2)
+{
+	std::array<float, 8> result;
+	for(int i = 0; i < 8; i++)
+	{
+		result[i] = v1[i]*v2[i];
+	}
+    return result;
+}
+
+template<>
+std::array<float, 8> Multiply(const std::array<float, 8>& v1, float value)
+{
+    std::array<float, 8> result;
+	for(int i = 0; i < 8; i++)
+	{
+		result[i] = v1[i]*value;
+	}
+    return result;
+}
+
+template<>
+std::array<float, 8> Sqrt(const std::array<float, 8> &v)
+{
+    std::array<float, 8> result;
+	for(int i = 0; i < 8; i++)
+	{
+		result[i] = std::sqrt(v[i]);
+	}
     return result;
 }
 

@@ -211,6 +211,35 @@ Mat4f Mat4f::MultIntrinsics(const Mat4f &rhs) const noexcept
 
 #endif
 
+#if defined(__aarch64__)
+Mat4f Mat4f::MultIntrinsics(const Mat4f &rhs) const noexcept
+{
+    std::array<Vec4f, 4> v;
+    auto c1 = vld1q_f32(&this->values_[0][0]);
+    auto c2 = vld1q_f32(&this->values_[1][0]);
+    auto c3 = vld1q_f32(&this->values_[2][0]);
+    auto c4 = vld1q_f32(&this->values_[3][0]);
+    for (int column = 0; column < 4; column++)
+    {
+        auto x = vld1q_dup_f32(&rhs.values_[column][0]);
+        auto y = vld1q_dup_f32(&rhs.values_[column][1]);
+        auto z = vld1q_dup_f32(&rhs.values_[column][2]);
+        auto w = vld1q_dup_f32(&rhs.values_[column][3]);
+        x = vmulq_f32(c1, x);
+        y = vmulq_f32(c2, y);
+        z = vmulq_f32(c3, z);
+        w = vmulq_f32(c4, w);
+
+        x = vaddq_f32(x, y);
+        z = vaddq_f32(z, w);
+        x = vaddq_f32(x, z);
+        vst1q_f32(&v[column][0], x);
+    }
+    return Mat4f(v);
+}
+
+#endif
+
 
 
 }

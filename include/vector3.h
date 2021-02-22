@@ -1,5 +1,7 @@
 #pragma once
 #include <array>
+#include <cmath>
+#include "instrinsics.h"
 
 namespace maths
 {
@@ -96,10 +98,24 @@ private:
 };
 
 template<std::size_t N>
-std::array<float, N> Multiply(const std::array<float, N>& v1, const std::array<float, N>& v2);
+std::array<float, N> Multiply(const std::array<float, N>& v1, const std::array<float, N>& v2)
+{
+    std::array<float, N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result[i] = v1[i]*v2[i];
+    }
+}
 
 template<std::size_t N>
-std::array<float, N> Multiply(const std::array<float, N>& v1, float value);
+std::array<float, N> Multiply(const std::array<float, N>& v1, float value)
+{
+    std::array<float, N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result[i] = v1[i]*value;
+    }
+}
 
 template<std::size_t N>
 std::array<float, N> Inverse(const std::array<float,N>& v)
@@ -123,7 +139,15 @@ std::array<float, N> Negative(const std::array<float,N>& v)
     return result;
 }
 template<std::size_t N>
-std::array<float, N> Sqrt(const std::array<float,N>& v);
+std::array<float, N> Sqrt(const std::array<float,N>& v)
+{
+    std::array<float, N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result[i] = std::sqrt(v[i]);
+    }
+    return result;
+}
 
 template<>
 std::array<float, 4> Multiply(const std::array<float, 4>& v1, const std::array<float, 4>& v2);
@@ -134,7 +158,7 @@ std::array<float, 4> Multiply(const std::array<float, 4> &v1, float value);
 template<>
 std::array<float, 4> Sqrt(const std::array<float,4>& v);
 
-
+#if defined(__AVX2__)
 template<>
 std::array<float, 8> Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2);
 
@@ -143,4 +167,5 @@ std::array<float, 8> Multiply(const std::array<float, 8>& v1, float value);
 
 template<>
 std::array<float, 8> Sqrt(const std::array<float,8>& v);
+#endif
 }

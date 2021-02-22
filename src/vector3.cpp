@@ -651,7 +651,7 @@ std::array<float, 8> EightVec3f::Magnitude() const
 }
 
 template<>
-std::array<float, 8> maths::Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2)
+std::array<float, 8> Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2)
 {
     auto v1s = _mm256_loadu_ps(v1.data());
     auto v2s = _mm256_loadu_ps(v2.data());
@@ -765,39 +765,6 @@ std::array<float, 8> EightVec3f::Magnitude() const
 	{
 		result[i] = std::sqrt(
 		xs[i]*xs[i]+ys[i]*ys[i]+zs[i]*zs[i]);
-	}
-    return result;
-}
-
-template<>
-std::array<float, 8> maths::Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2)
-{
-	std::array<float, 8> result;
-	for(int i = 0; i < 8; i++)
-	{
-		result[i] = v1[i]*v2[i];
-	}
-    return result;
-}
-
-template<>
-std::array<float, 8> Multiply(const std::array<float, 8>& v1, float value)
-{
-    std::array<float, 8> result;
-	for(int i = 0; i < 8; i++)
-	{
-		result[i] = v1[i]*value;
-	}
-    return result;
-}
-
-template<>
-std::array<float, 8> Sqrt(const std::array<float, 8> &v)
-{
-    std::array<float, 8> result;
-	for(int i = 0; i < 8; i++)
-	{
-		result[i] = std::sqrt(v[i]);
 	}
     return result;
 }

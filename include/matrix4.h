@@ -26,10 +26,15 @@ public:
 	[[nodiscard]] Mat4f operator-(const Mat4f& rhs) const;
 	[[nodiscard]] Vec4f operator*(const Vec4f& rhs) const;
 	Mat4f operator*(float rhs) const noexcept;
+	Mat4f operator/(float rhs) const noexcept;
 	Mat4f operator*(const Mat4f& rhs) const noexcept;
 	Mat4f MultIntrinsics(const Mat4f& rhs) const noexcept;
 	[[nodiscard]] float Determinant() const;
 	[[nodiscard]] Mat4f Inverse() const;
+	[[nodiscard]] Mat4f InverseOpti() const;
+
+	static float MatrixDiff(const Mat4f& m1, const Mat4f& m2);
+
 	const static Mat4f Identity;
 	const static Mat4f Zero;
 private:
@@ -53,4 +58,6 @@ const inline Mat4f Mat4f::Zero = Mat4f(
 		Vec4f::zero,
 		Vec4f::zero
 });
+
+
 }

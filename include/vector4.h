@@ -16,10 +16,17 @@ union Vec4f
     Vec4f(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
     Vec4f(const float* ptr);
 
+    Vec4f operator+(const Vec4f& v) const;
+    Vec4f operator-(const Vec4f& v) const;
+    Vec4f operator*(float f) const;
+    Vec4f operator/(float f) const;
+
     float& operator[](std::size_t idx) { return data[idx]; }
-    float operator[](std::size_t idx) const { return data[idx]; }
+    const float& operator[](std::size_t idx) const { return data[idx]; }
 
     static const Vec4f zero;
 };
 inline Vec4f const Vec4f::zero = Vec4f();
+
+
 }

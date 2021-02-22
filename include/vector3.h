@@ -21,7 +21,7 @@ union Vec3f
     Vec3f operator/(float f) const;
 
     float& operator[](std::size_t idx) { return values[idx]; }
-    float operator[](std::size_t idx) const { return values[idx]; }
+    const float& operator[](std::size_t idx) const { return values[idx]; }
 
     [[nodiscard]] float Magnitude() const;
     [[nodiscard]] float SqrMagnitude() const;

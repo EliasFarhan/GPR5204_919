@@ -127,6 +127,7 @@ NVec3f<N> NVec3f<N>::operator-(const NVec3f &v) const
     }
     return result;
 }
+
 template<std::size_t N>
 NVec3f<N> NVec3f<N>::operator*(const FloatArray<N> &rhs) const
 {
@@ -139,6 +140,20 @@ NVec3f<N> NVec3f<N>::operator*(const FloatArray<N> &rhs) const
     }
     return result;
 }
+
+template<std::size_t N>
+NVec3f<N> NVec3f<N>::operator*(float rhs) const
+{
+    NVec3f<N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result.xs[i] = xs[i]*rhs;
+        result.ys[i] = ys[i]*rhs;
+        result.zs[i] = zs[i]*rhs;
+    }
+    return result;
+}
+
 template<std::size_t N>
 NVec3f<N> NVec3f<N>::operator/(const FloatArray<N> &rhs) const
 {
@@ -156,11 +171,19 @@ FloatArray<N> NVec3f<N>::SqrMagnitude() const
 {
     return Dot(*this, *this);
 }
+
+template<std::size_t N>
+FloatArray<N> NVec3f<N>::Magnitude() const
+{
+    return FloatArray<N>::Sqrt(SqrMagnitude());
+}
+
 template<std::size_t N>
 NVec3f<N> NVec3f<N>::Normalized() const
 {
     return *this/Magnitude();
 }
+
 template<std::size_t N>
 std::array<Vec3f, N> NVec3f<N>::vectors() const
 {

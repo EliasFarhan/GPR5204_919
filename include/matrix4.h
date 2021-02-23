@@ -53,10 +53,10 @@ const inline Mat4f Mat4f::Identity = Mat4f(
 const inline Mat4f Mat4f::Zero = Mat4f(
 	std::array<Vec4f, 4>
 {
-	Vec4f::zero,
-		Vec4f::zero,
-		Vec4f::zero,
-		Vec4f::zero
+	Vec4f::zero(),
+    Vec4f::zero(),
+    Vec4f::zero(),
+    Vec4f::zero()
 });
 
 

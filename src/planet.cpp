@@ -37,7 +37,7 @@ void PlanetSystem::Update(float dt)
 {
     for(auto & position : positions_)
     {
-        const auto deltaToCenter = maths::Vec3f::zero - position;
+        const auto deltaToCenter = maths::Vec3f() - position;
         const auto r = deltaToCenter.Magnitude();
         const auto forceScalar = gravityConst * centerMass * asteroidMass / (r * r);
         const auto forceVector = deltaToCenter / r * forceScalar;
@@ -71,14 +71,13 @@ void PlanetSystem4::Update(float dt)
         const auto sunPos = maths::FourVec3f(maths::Vec3f());
         const auto deltaToCenter = sunPos - positionsSOA_[i];
         const auto r = deltaToCenter.Magnitude();
-        const auto forceScalar = maths::Multiply(maths::Inverse(maths::Multiply(r,r)),
-                                                 gravityConst * centerMass * asteroidMass);
+        const auto forceScalar = maths::FourFloat::Reciprocal(r*r) *
+            (gravityConst * centerMass * asteroidMass);
         const auto forceVector = deltaToCenter / r * forceScalar;
-        auto velDir = maths::FourVec3f(maths::Negative(deltaToCenter.Zs()), std::array<float, 4>(), deltaToCenter.Xs());
+        auto velDir = maths::FourVec3f(-(deltaToCenter.Zs()), maths::FourFloat(), deltaToCenter.Xs());
         velDir = velDir.Normalized();
 
-        const auto speed = maths::Sqrt(maths::Multiply(
-            maths::Multiply(forceVector.Magnitude(), deltaToCenter.Magnitude()),
+        const auto speed = maths::FourFloat::Sqrt(forceVector.Magnitude()*deltaToCenter.Magnitude()*(
             1.0f / asteroidMass));
         const auto velocity = velDir * speed;
         positionsSOA_[i] = positionsSOA_[i] + velocity * dt;
@@ -112,15 +111,14 @@ void PlanetSystem8::Update(float dt)
         const auto sunPos = maths::EightVec3f(maths::Vec3f());
         const auto deltaToCenter = sunPos - positionsSOA_[i];
         const auto r = deltaToCenter.Magnitude();
-        const auto forceScalar = maths::Multiply(maths::Inverse(maths::Multiply(r,r)),
-                                                 gravityConst * centerMass * asteroidMass);
+        const auto forceScalar = maths::EightFloat::Reciprocal(r*r)*(
+            gravityConst * centerMass * asteroidMass);
         const auto forceVector = deltaToCenter / r * forceScalar;
-        auto velDir = maths::EightVec3f(maths::Negative(deltaToCenter.Zs()), std::array<float, 8>(), deltaToCenter.Xs());
+        auto velDir = maths::EightVec3f(-deltaToCenter.Zs(), maths::EightFloat(), deltaToCenter.Xs());
         velDir = velDir.Normalized();
 
-        const auto speed = maths::Sqrt(maths::Multiply(
-            maths::Multiply(forceVector.Magnitude(), deltaToCenter.Magnitude()),
-            1.0f / asteroidMass));
+        const auto speed = maths::EightFloat::Sqrt(forceVector.Magnitude()*deltaToCenter.Magnitude()*
+            (1.0f / asteroidMass));
         const auto velocity = velDir * speed;
         positionsSOA_[i] = positionsSOA_[i] + velocity * dt;
         // Putting back the SoA in AoS format

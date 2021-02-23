@@ -16,44 +16,6 @@ void FillRandom(maths::Vec3f& v)
     v[2] = dis(gen);
 }
 
-void FillRandom(maths::FourVec3f& v)
-{
-    static std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-    static std::uniform_real_distribution<float> dis(-100.0f, 100.0f);
-    for(auto& xs : v.Xs())
-    {
-        xs = dis(gen);
-    }
-    for(auto& ys : v.Ys())
-    {
-        ys = dis(gen);
-    }
-    for(auto& zs : v.Zs())
-    {
-        zs = dis(gen);
-    }
-}
-
-void FillRandom(maths::EightVec3f& v)
-{
-    static std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-    static std::uniform_real_distribution<float> dis(-100.0f, 100.0f);
-    for(auto& xs : v.Xs())
-    {
-        xs = dis(gen);
-    }
-    for(auto& ys : v.Ys())
-    {
-        ys = dis(gen);
-    }
-    for(auto& zs : v.Zs())
-    {
-        zs = dis(gen);
-    }
-}
-
 void FillRandom(std::vector<int> &v, int low, int high)
 {
     static std::random_device rd;  //Will be used to obtain a seed for the random number engine

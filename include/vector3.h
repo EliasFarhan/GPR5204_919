@@ -2,6 +2,7 @@
 #include <array>
 #include <cmath>
 #include "instrinsics.h"
+#include "vectorize.h"
 
 namespace maths
 {
@@ -14,7 +15,7 @@ union Vec3f
     std::array<float, 3> values{};
 
     constexpr Vec3f() : x(0), y(0), z(0){}
-    Vec3f(float x, float y, float z) : x(x), y(y), z(z){}
+    constexpr Vec3f(float x, float y, float z) : x(x), y(y), z(z){}
     Vec3f(const float* ptr);
 
     Vec3f operator+(const Vec3f& v) const;
@@ -28,146 +29,199 @@ union Vec3f
     [[nodiscard]] float Magnitude() const;
     [[nodiscard]] float SqrMagnitude() const;
     [[nodiscard]] Vec3f Normalized() const;
-    static const Vec3f zero;
+    static constexpr Vec3f zero(){return Vec3f();};
+    static constexpr Vec3f one(){return Vec3f(1,1,1);};
 };
-
-inline Vec3f const Vec3f::zero = Vec3f();
 
 float Dot(const Vec3f& v1, const Vec3f& v2);
 
-class FourVec3f
+template<std::size_t N>
+class NVec3f
 {
 public:
-    FourVec3f() = default;
-    FourVec3f(const Vec3f *ptr);
-    FourVec3f(Vec3f v);
-    FourVec3f(const std::array<float, 4>& xs, const std::array<float, 4>& ys, const std::array<float, 4>& zs);
+    NVec3f() = default;
+    NVec3f(const Vec3f *ptr);
+    NVec3f(Vec3f v);
+    NVec3f(const std::array<float, N>& xs, const std::array<float, N>& ys, const std::array<float, N>& zs) :
+        xs(xs), ys(ys), zs(zs){}
+    NVec3f(const FloatArray<N> & xs, const FloatArray<N> & ys, const FloatArray<N> & zs) :
+        xs(xs.array()), ys(ys.array()), zs(zs.array()){}
 
-    [[nodiscard]] std::array<float, 4> Magnitude() const;
-    [[nodiscard]] std::array<float, 4> SqrMagnitude() const;
-    static std::array<float, 4> Dot(const FourVec3f &v1, const FourVec3f &v2);
-    [[nodiscard]] FourVec3f Normalized() const;
+    [[nodiscard]] FloatArray<N> Magnitude() const;
+    [[nodiscard]] FloatArray<N> SqrMagnitude() const;
+    static FloatArray<N> Dot(const NVec3f &v1, const NVec3f &v2);
+    [[nodiscard]] NVec3f Normalized() const;
 
-    [[nodiscard]] const std::array<float, 4> & Xs() const {return xs;}
-    std::array<float, 4> & Xs() {return xs;}
-    std::array<float, 4>& Ys(){return ys;}
-    [[nodiscard]] const std::array<float, 4> & Zs() const {return zs;}
-    std::array<float, 4> & Zs() {return zs;}
+    [[nodiscard]] FloatArray<N> Xs() const {return xs;}
+    [[nodiscard]] FloatArray<N> Ys() const {return ys;}
+    [[nodiscard]] FloatArray<N> Zs() const {return zs;}
 
-    FourVec3f operator+(const FourVec3f& v) const;
-    FourVec3f operator-(const FourVec3f& v) const;
-    FourVec3f operator*(const std::array<float, 4>& values) const;
-    FourVec3f operator*(float value) const;
-    FourVec3f operator/(const std::array<float, 4>& values) const;
+    [[nodiscard]] std::array<float, N>& Xs() {return xs;}
+    [[nodiscard]] std::array<float, N>& Ys() {return ys;}
+    [[nodiscard]] std::array<float, N>& Zs() {return zs;}
 
-    [[nodiscard]] std::array<Vec3f, 4> vectors() const;
+    NVec3f operator+(const NVec3f& v) const;
+    NVec3f operator-(const NVec3f& v) const;
+    NVec3f operator*(const FloatArray<N> & rhs) const;
+    NVec3f operator*(float value) const;
+    NVec3f operator/(const FloatArray<N> & rhs) const;
+
+    [[nodiscard]] std::array<Vec3f, N> vectors() const;
 private:
-    std::array<float, 4> xs{};
-    std::array<float, 4> ys{};
-    std::array<float, 4> zs{};
-};
-
-class EightVec3f
-{
-public:
-    EightVec3f() = default;
-    EightVec3f(const Vec3f *ptr);
-    EightVec3f(Vec3f v);
-    EightVec3f(const std::array<float, 8>& xs, const std::array<float, 8>& ys, const std::array<float, 8>& zs);
-
-    [[nodiscard]] std::array<float, 8> Magnitude() const;
-    static std::array<float, 8> Dot(const EightVec3f &v1, const EightVec3f &v2);
-    [[nodiscard]] EightVec3f Normalized() const;
-    std::array<float, 8>& Xs(){return xs;}
-    [[nodiscard]] const std::array<float, 8>& Xs() const {return xs;}
-    std::array<float, 8>& Ys(){return ys;}
-    std::array<float, 8>& Zs(){return zs;}
-    [[nodiscard]] const std::array<float, 8>& Zs() const {return zs;}
-
-    EightVec3f operator+(const EightVec3f& v) const;
-    EightVec3f operator-(const EightVec3f& v) const;
-    EightVec3f operator*(const std::array<float, 8>& values) const;
-    EightVec3f operator*(float value) const;
-    EightVec3f operator/(const std::array<float, 8>& values) const;
-
-    [[nodiscard]] std::array<Vec3f, 8> vectors() const;
-private:
-    std::array<float, 8> xs{};
-    std::array<float, 8> ys{};
-    std::array<float, 8> zs{};
+    std::array<float, N> xs{};
+    std::array<float, N> ys{};
+    std::array<float, N> zs{};
 };
 
 template<std::size_t N>
-std::array<float, N> Multiply(const std::array<float, N>& v1, const std::array<float, N>& v2)
+NVec3f<N>::NVec3f(const Vec3f *ptr)
 {
-    std::array<float, N> result;
     for(std::size_t i = 0; i < N; i++)
     {
-        result[i] = v1[i]*v2[i];
+        xs[i] = ptr[i].x;
+        ys[i] = ptr[i].y;
+        zs[i] = ptr[i].z;
+    }
+}
+template<std::size_t N>
+NVec3f<N>::NVec3f(Vec3f v)
+{
+    for(std::size_t i = 0; i < N; i++)
+    {
+        xs[i] = v.x;
+        ys[i] = v.y;
+        zs[i] = v.z;
+    }
+}
+template<std::size_t N>
+FloatArray<N> NVec3f<N>::Dot(const NVec3f &v1, const NVec3f &v2)
+{
+    FloatArray<N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result[i] = v1.xs[i]*v2.xs[i]+v1.ys[i]*v2.ys[i]+v1.zs[i]*v2.zs[i];
+    }
+    return result;
+}
+template<std::size_t N>
+NVec3f<N> NVec3f<N>::operator+(const NVec3f &v) const
+{
+    NVec3f<N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result.xs[i] = xs[i]+v.xs[i];
+        result.ys[i] = ys[i]+v.ys[i];
+        result.zs[i] = zs[i]+v.zs[i];
+    }
+    return result;
+}
+template<std::size_t N>
+NVec3f<N> NVec3f<N>::operator-(const NVec3f &v) const
+{
+    NVec3f<N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result.xs[i] = xs[i]-v.xs[i];
+        result.ys[i] = ys[i]-v.ys[i];
+        result.zs[i] = zs[i]-v.zs[i];
+    }
+    return result;
+}
+template<std::size_t N>
+NVec3f<N> NVec3f<N>::operator*(const FloatArray<N> &rhs) const
+{
+    NVec3f<N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result.xs[i] = xs[i]*rhs[i];
+        result.ys[i] = ys[i]*rhs[i];
+        result.zs[i] = zs[i]*rhs[i];
+    }
+    return result;
+}
+template<std::size_t N>
+NVec3f<N> NVec3f<N>::operator/(const FloatArray<N> &rhs) const
+{
+    NVec3f<N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result.xs[i] = xs[i]/rhs[i];
+        result.ys[i] = ys[i]/rhs[i];
+        result.zs[i] = zs[i]/rhs[i];
+    }
+    return result;
+}
+template<std::size_t N>
+FloatArray<N> NVec3f<N>::SqrMagnitude() const
+{
+    return Dot(*this, *this);
+}
+template<std::size_t N>
+NVec3f<N> NVec3f<N>::Normalized() const
+{
+    return *this/Magnitude();
+}
+template<std::size_t N>
+std::array<Vec3f, N> NVec3f<N>::vectors() const
+{
+    std::array<Vec3f, N> result;
+    for(std::size_t i = 0; i < N; i++)
+    {
+        result[i].x = xs[i];
+        result[i].y = ys[i];
+        result[i].z = zs[i];
     }
     return result;
 }
 
-template<std::size_t N>
-std::array<float, N> Multiply(const std::array<float, N>& v1, float value)
-{
-    std::array<float, N> result;
-    for(std::size_t i = 0; i < N; i++)
-    {
-        result[i] = v1[i]*value;
-    }
-    return result;
-}
+using FourVec3f = NVec3f<4>;
+using EightVec3f = NVec3f<8>;
 
-template<std::size_t N>
-std::array<float, N> Inverse(const std::array<float,N>& v)
-{
-    std::array<float, N> result;
-    for(std::size_t i = 0; i < N; i++)
-    {
-        result[i] = 1.0f / v[i];
-    }
-    return result;
-}
-
-template<std::size_t N>
-std::array<float, N> Negative(const std::array<float,N>& v)
-{
-    std::array<float, N> result;
-    for(std::size_t i = 0; i < N; i++)
-    {
-        result[i] = -v[i];
-    }
-    return result;
-}
-template<std::size_t N>
-std::array<float, N> Sqrt(const std::array<float,N>& v)
-{
-    std::array<float, N> result;
-    for(std::size_t i = 0; i < N; i++)
-    {
-        result[i] = std::sqrt(v[i]);
-    }
-    return result;
-}
+#if defined(__SSE__) or defined(__aarch64__)
+template<>
+FourVec3f FourVec3f::operator+(const FourVec3f& v) const;
 
 template<>
-std::array<float, 4> Multiply(const std::array<float, 4>& v1, const std::array<float, 4>& v2);
+FourVec3f FourVec3f::operator-(const FourVec3f& v) const;
 
 template<>
-std::array<float, 4> Multiply(const std::array<float, 4> &v1, float value);
+FourVec3f FourVec3f::operator*(const FourFloat & rhs) const;
 
 template<>
-std::array<float, 4> Sqrt(const std::array<float,4>& v);
+FourVec3f FourVec3f::operator/(const FourFloat & rhs) const;
+
+template<>
+FourVec3f FourVec3f::operator*(float value) const;
+
+template<>
+FourFloat FourVec3f::Dot(const FourVec3f &v1, const FourVec3f &v2);
+
+template<>
+FourFloat FourVec3f::Magnitude() const;
+#endif
+
 
 #if defined(__AVX2__)
 template<>
-std::array<float, 8> Multiply(const std::array<float, 8> &v1, const std::array<float, 8> &v2);
+EightVec3f EightVec3f::operator+(const EightVec3f& v) const;
 
 template<>
-std::array<float, 8> Multiply(const std::array<float, 8>& v1, float value);
+EightVec3f EightVec3f::operator-(const EightVec3f& v) const;
 
 template<>
-std::array<float, 8> Sqrt(const std::array<float,8>& v);
+EightVec3f EightVec3f::operator*(const EightFloat& rhs) const;
+
+template<>
+EightVec3f EightVec3f::operator*(float value) const;
+
+template<>
+EightVec3f EightVec3f::operator/(const EightFloat & values) const;
+
+template<>
+EightFloat EightVec3f::Dot(const EightVec3f &v1, const EightVec3f &v2);
+
+template<>
+EightFloat EightVec3f::Magnitude() const;
+
 #endif
 }

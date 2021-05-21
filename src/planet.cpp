@@ -11,7 +11,7 @@ const float gravityConst = 1000.0f;
 const float centerMass = 1000.0f;
 const float asteroidMass = 1.0f;
 
-static void PlanetInitPosition(maths::Vec3f& pos)
+static void PlanetInitPosition(maths::Vec3f& pos) noexcept
 {
     static std::random_device rd;  //Will be used to obtain a seed for the random number engine
     static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
@@ -24,7 +24,7 @@ static void PlanetInitPosition(maths::Vec3f& pos)
     pos = maths::Vec3f(std::cos(angle)*dist, disY(gen), std::sin(angle)*dist);
 }
 
-PlanetSystem::PlanetSystem(std::size_t length)
+PlanetSystem::PlanetSystem(std::size_t length) noexcept
 {
     positions_.resize(length);
     for(auto& pos: positions_)
@@ -33,7 +33,7 @@ PlanetSystem::PlanetSystem(std::size_t length)
     }
 }
 
-void PlanetSystem::Update(float dt)
+void PlanetSystem::Update(float dt) noexcept
 {
     for(auto & position : positions_)
     {
@@ -50,7 +50,7 @@ void PlanetSystem::Update(float dt)
     }
 }
 
-PlanetSystem4::PlanetSystem4(std::size_t length)
+PlanetSystem4::PlanetSystem4(std::size_t length) noexcept
 {
     positions_.resize(length);
     for(auto& pos: positions_)
@@ -64,7 +64,7 @@ PlanetSystem4::PlanetSystem4(std::size_t length)
     }
 }
 
-void PlanetSystem4::Update(float dt)
+void PlanetSystem4::Update(float dt) noexcept
 {
     for(std::size_t i = 0; i < positionsSOA_.size(); i++)
     {
@@ -90,7 +90,7 @@ void PlanetSystem4::Update(float dt)
     }
 }
 
-PlanetSystem8::PlanetSystem8(std::size_t length)
+PlanetSystem8::PlanetSystem8(std::size_t length) noexcept
 {
     positions_.resize(length);
     for(auto& pos: positions_)
@@ -104,7 +104,7 @@ PlanetSystem8::PlanetSystem8(std::size_t length)
     }
 }
 
-void PlanetSystem8::Update(float dt)
+void PlanetSystem8::Update(float dt) noexcept
 {
     for(std::size_t i = 0; i < positionsSOA_.size(); i++)
     {

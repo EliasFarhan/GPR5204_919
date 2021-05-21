@@ -11,8 +11,8 @@
 class PlanetSystem
 {
 public:
-    explicit PlanetSystem(std::size_t length);
-    void Update(float dt);
+    explicit PlanetSystem(std::size_t length)  noexcept;
+    void Update(float dt)  noexcept;
 private:
     std::vector<maths::Vec3f> positions_;
 };
@@ -20,8 +20,8 @@ private:
 class PlanetSystem4
 {
 public:
-    explicit PlanetSystem4(std::size_t length);
-    void Update(float dt);
+    explicit PlanetSystem4(std::size_t length) noexcept;
+    void Update(float dt) noexcept;
 private:
     std::vector<maths::FourVec3f> positionsSOA_;
     std::vector<maths::Vec3f> positions_;
@@ -30,8 +30,8 @@ private:
 class PlanetSystem8
 {
 public:
-    explicit PlanetSystem8(std::size_t length);
-    void Update(float dt);
+    explicit PlanetSystem8(std::size_t length) noexcept;
+    void Update(float dt) noexcept;
 private:
     std::vector<maths::EightVec3f> positionsSOA_;
     std::vector<maths::Vec3f> positions_;
